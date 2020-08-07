@@ -23,7 +23,12 @@ predict.mModel <- function(object, X, knowns=NULL, B=NULL, P=NULL, ...) {
       if (object$d > 1) {
          ss = svd(object$cvar[i,,])
          rtas <- ss$d
-         matc = t(ss$u[rtas > 10^-8, ]) %*% diag(rtas[rtas > 10^-8]^(-1/2)) %*% ss$v[rtas > 10^-8,]
+	if (sum(rtas > 10^-8)==1)
+	{
+  	  matc = t(ss$u[rtas > 10^-8, ]) * rtas[rtas > 10^-8]^(-1/2) * ss$v[rtas > 10^-8, ]
+	}else{
+  	  matc = t(ss$u[rtas > 10^-8, ]) %*% diag(rtas[rtas > 10^-8]^(-1/2)) %*% ss$v[rtas > 10^-8, ]
+	}
          tx = apply(X, 1, get("-"), object$mu[i,,drop=F])
 #         lfik[,i] <- exp(-colSums((matc %*% tx)^2)/2)/sqrt(prod(2*pi*rtas[rtas > 10^-8]))
          lfik[,i] <- -colSums((matc %*% tx)^2)/2 -sum(log(2*pi*rtas[rtas > 10^-8]))/2
